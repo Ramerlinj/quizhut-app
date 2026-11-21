@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Check, Copy, Code2 } from 'lucide-react';
+import { Check, Copy, Terminal } from 'lucide-react';
 
 function renderInlineText(text) {
-  // Split prose by inline backtick code `...`
   const parts = text.split(/(`[^`\n]+`)/g);
   return parts.map((part, idx) => {
     if (part.startsWith('`') && part.endsWith('`') && part.length >= 2) {
@@ -38,59 +37,18 @@ function CodeBlock({ segment, compact = false }) {
     >
       {!compact && (
         <div className="code-block-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span
-              style={{
-                display: 'inline-flex',
-                gap: 5,
-                alignItems: 'center',
-              }}
-            >
-              <span
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  background: '#eb6f92',
-                  display: 'inline-block',
-                }}
-              />
-              <span
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  background: '#f6c177',
-                  display: 'inline-block',
-                }}
-              />
-              <span
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  background: '#9ccfd8',
-                  display: 'inline-block',
-                }}
-              />
-            </span>
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: '#c4a7e7',
-                background: 'rgba(196, 167, 231, 0.14)',
-                padding: '2px 9px',
-                borderRadius: 999,
-                marginLeft: 4,
-              }}
-            >
-              <Code2 size={13} />
-              {segment.label || 'Código'}
-            </span>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#9aa2ba',
+            }}
+          >
+            <Terminal size={13} color="var(--accent-lavender)" />
+            <span>{segment.label || 'Código'}</span>
           </div>
 
           <button
@@ -101,18 +59,18 @@ function CodeBlock({ segment, compact = false }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 5,
-              border: 'none',
-              background: 'rgba(224, 222, 244, 0.1)',
-              color: copied ? '#9ccfd8' : '#e0def4',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              padding: '4px 10px',
-              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.04)',
+              color: copied ? '#86dfba' : '#b4bacb',
+              fontSize: '0.73rem',
+              fontWeight: 600,
+              padding: '3px 9px',
+              borderRadius: 6,
               cursor: 'pointer',
               fontFamily: 'inherit',
             }}
           >
-            {copied ? <Check size={13} /> : <Copy size={13} />}
+            {copied ? <Check size={12} /> : <Copy size={12} />}
             {copied ? 'Copiado' : 'Copiar'}
           </button>
         </div>
@@ -125,7 +83,7 @@ function CodeBlock({ segment, compact = false }) {
               aria-hidden="true"
               style={{
                 userSelect: 'none',
-                color: '#6e6a86',
+                color: 'var(--code-gutter)',
                 textAlign: 'right',
                 minWidth: lines.length >= 10 ? '1.8em' : '1.2em',
                 flexShrink: 0,
@@ -154,7 +112,7 @@ export default function RichContent({ segments, compact = false, textStyle = {} 
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: compact ? 8 : 14,
+        gap: compact ? 8 : 12,
         width: '100%',
       }}
     >
@@ -168,7 +126,7 @@ export default function RichContent({ segments, compact = false, textStyle = {} 
             style={{
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
-              lineHeight: compact ? 1.38 : 1.5,
+              lineHeight: compact ? 1.42 : 1.55,
               ...textStyle,
             }}
           >

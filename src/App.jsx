@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UploadCloud, PlayCircle, Sparkles, Moon, Sun } from 'lucide-react';
+import { UploadCloud, PlayCircle, LayoutGrid, Moon, Sun } from 'lucide-react';
 import UploadTab from './components/UploadTab';
 import StartTab from './components/StartTab';
 import QuizPlayer from './components/QuizPlayer';
@@ -90,87 +90,72 @@ export default function App() {
 
   return (
     <>
-      {/* Animated Pastel Background Blobs */}
-      <div className="pastel-bg" aria-hidden="true">
-        <div className="blob blob-1" />
-        <div className="blob blob-2" />
-        <div className="blob blob-3" />
-        <div className="blob blob-4" />
-      </div>
-
-      <div className="app-container">
-        {/* Top Bar */}
-        <header
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 14,
-            marginBottom: 24,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+      <header className="top-header">
+        <div className="top-header-inner">
+          {/* Brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
               style={{
-                width: 46,
-                height: 46,
-                borderRadius: 16,
-                background: 'linear-gradient(135deg, #c4b5fd 0%, #fbcfe8 55%, #fde68a 100%)',
+                width: 34,
+                height: 34,
+                borderRadius: 9,
+                background: 'var(--accent-lavender-soft)',
+                border: '1px solid var(--accent-lavender-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#4c1d95',
-                boxShadow: '0 8px 20px -6px rgba(139, 92, 246, 0.35)',
+                color: 'var(--accent-lavender)',
               }}
             >
-              <Sparkles size={24} />
+              <LayoutGrid size={17} />
             </div>
             <div>
               <div
+                className="font-display"
                 style={{
-                  fontWeight: 900,
-                  fontSize: '1.3rem',
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1.1,
+                  fontWeight: 700,
+                  fontSize: '1.02rem',
+                  lineHeight: 1.15,
+                  color: 'var(--text-main)',
                 }}
               >
                 PastelQuiz
               </div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                Excel → Quiz interactivo con código
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                Evaluaciones desde Excel
               </div>
             </div>
           </div>
 
+          {/* Navigation & Theme Switcher */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <nav className="nav-tabs" aria-label="Navegación principal">
+            <nav className="segmented-nav" aria-label="Navegación principal">
               <button
                 type="button"
-                className={`nav-tab ${activeTab === 'upload' ? 'active' : ''}`}
+                className={`segmented-tab ${activeTab === 'upload' ? 'active' : ''}`}
                 onClick={() => setActiveTab('upload')}
               >
-                <UploadCloud size={18} />
-                Cargar Excel
+                <UploadCloud size={15} />
+                Cargar archivo
               </button>
 
               <button
                 type="button"
                 disabled={!quiz}
-                className={`nav-tab ${activeTab === 'quiz' ? 'active' : ''}`}
+                className={`segmented-tab ${activeTab === 'quiz' ? 'active' : ''}`}
                 onClick={() => setActiveTab('quiz')}
               >
-                <PlayCircle size={18} />
-                Responder Quiz
+                <PlayCircle size={15} />
+                Evaluación
                 {quiz && (
                   <span
                     style={{
-                      background: 'var(--pill-purple-bg)',
-                      color: 'var(--pill-purple-text)',
-                      fontSize: '0.74rem',
-                      padding: '2px 8px',
-                      borderRadius: 999,
-                      fontWeight: 900,
+                      background: 'var(--accent-lavender-soft)',
+                      color: 'var(--accent-lavender)',
+                      fontSize: '0.72rem',
+                      padding: '1px 6px',
+                      borderRadius: 5,
+                      fontWeight: 600,
                     }}
                   >
                     {quiz.questions.length}
@@ -181,62 +166,61 @@ export default function App() {
 
             <button
               type="button"
-              className="icon-pill-btn"
+              className="icon-btn"
               onClick={() => setDarkMode((d) => !d)}
-              title={darkMode ? 'Cambiar a modo claro pastel' : 'Cambiar a modo oscuro pastel'}
+              title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
               aria-label={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             >
-              {darkMode ? <Sun size={19} color="#fde68a" /> : <Moon size={19} color="#6d28d9" />}
+              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Active Tab Content */}
-        <main>
-          {activeTab === 'upload' && (
-            <UploadTab onQuizLoaded={handleQuizLoaded} onLoadSample={handleLoadSample} />
-          )}
+      <main className="app-main">
+        {activeTab === 'upload' && (
+          <UploadTab onQuizLoaded={handleQuizLoaded} onLoadSample={handleLoadSample} />
+        )}
 
-          {activeTab === 'quiz' && quiz && phase === 'ready' && (
-            <StartTab
-              quiz={quiz}
-              settings={settings}
-              onChangeSettings={setSettings}
-              onStartQuiz={handleStartQuiz}
-              onBackToUpload={() => setActiveTab('upload')}
-            />
-          )}
+        {activeTab === 'quiz' && quiz && phase === 'ready' && (
+          <StartTab
+            quiz={quiz}
+            settings={settings}
+            onChangeSettings={setSettings}
+            onStartQuiz={handleStartQuiz}
+            onBackToUpload={() => setActiveTab('upload')}
+          />
+        )}
 
-          {activeTab === 'quiz' && quiz && phase === 'playing' && (
-            <QuizPlayer
-              key={runId}
-              questions={playQuestions}
-              quizTitle={quiz.title}
-              settings={settings}
-              soundEnabled={soundEnabled}
-              onToggleSound={() => setSoundEnabled((s) => !s)}
-              onToggleQuestionTimer={() =>
-                setSettings((prev) => ({
-                  ...prev,
-                  showQuestionTimer: !prev.showQuestionTimer,
-                }))
-              }
-              onComplete={handleCompleteQuiz}
-            />
-          )}
+        {activeTab === 'quiz' && quiz && phase === 'playing' && (
+          <QuizPlayer
+            key={runId}
+            questions={playQuestions}
+            quizTitle={quiz.title}
+            settings={settings}
+            soundEnabled={soundEnabled}
+            onToggleSound={() => setSoundEnabled((s) => !s)}
+            onToggleQuestionTimer={() =>
+              setSettings((prev) => ({
+                ...prev,
+                showQuestionTimer: !prev.showQuestionTimer,
+              }))
+            }
+            onComplete={handleCompleteQuiz}
+          />
+        )}
 
-          {activeTab === 'quiz' && quiz && phase === 'results' && summary && (
-            <ResultsView
-              quizTitle={quiz.title}
-              summary={summary}
-              showQuestionTimer={settings.showQuestionTimer}
-              onRetry={handleStartQuiz}
-              onUploadNew={() => setActiveTab('upload')}
-              onCreateWrongQuiz={handleCreateWrongQuiz}
-            />
-          )}
-        </main>
-      </div>
+        {activeTab === 'quiz' && quiz && phase === 'results' && summary && (
+          <ResultsView
+            quizTitle={quiz.title}
+            summary={summary}
+            showQuestionTimer={settings.showQuestionTimer}
+            onRetry={handleStartQuiz}
+            onUploadNew={() => setActiveTab('upload')}
+            onCreateWrongQuiz={handleCreateWrongQuiz}
+          />
+        )}
+      </main>
     </>
   );
 }
