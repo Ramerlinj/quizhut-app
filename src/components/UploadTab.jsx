@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 import {
-  UploadCloud,
+  Upload,
   FileSpreadsheet,
-  Sparkles,
   Download,
   Code2,
   Infinity as InfinityIcon,
   Timer,
   AlertCircle,
+  ArrowUpRight,
 } from 'lucide-react';
 import { downloadExcelTemplate, parseExcelFile } from '../utils/excelParser';
 
@@ -25,7 +25,7 @@ export default function UploadTab({ onQuizLoaded, onLoadSample }) {
       const quiz = await parseExcelFile(file);
       onQuizLoaded(quiz);
     } catch (err) {
-      setErrorMsg(err?.message || 'No pudimos leer ese archivo. Verifica que sea .xlsx, .xls o .csv.');
+      setErrorMsg(err?.message || 'No se pudo procesar el archivo. Verifica que sea .xlsx, .xls o .csv.');
     } finally {
       setIsLoading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -40,52 +40,65 @@ export default function UploadTab({ onQuizLoaded, onLoadSample }) {
   };
 
   return (
-    <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-      {/* Main Upload Card */}
-      <div className="pastel-card" style={{ padding: '32px 28px', textAlign: 'center' }}>
+    <div className="animate-enter" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* Main Upload Panel */}
+      <div className="surface-card" style={{ padding: '28px 28px 24px' }}>
         <div
-          className="animate-bounce-slow"
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'var(--pill-purple-bg)',
-            color: 'var(--pill-purple-text)',
-            padding: '7px 16px',
-            borderRadius: 999,
-            fontSize: '0.86rem',
-            fontWeight: 800,
-            marginBottom: 14,
-            border: '1.5px solid var(--pill-purple-border)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 16,
+            marginBottom: 22,
           }}
         >
-          <Sparkles size={16} />
-          Sube tu Excel estilo Kahoot — ¡sin límites!
-        </div>
+          <div>
+            <h1
+              style={{
+                margin: '0 0 6px',
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: 'var(--text-main)',
+              }}
+            >
+              Importar cuestionario
+            </h1>
+            <p
+              style={{
+                margin: 0,
+                color: 'var(--text-secondary)',
+                fontSize: '0.92rem',
+                lineHeight: 1.5,
+                maxWidth: 580,
+              }}
+            >
+              Sube un archivo Excel o CSV compatible con la plantilla de Kahoot o una tabla simple.
+              Al cargar el archivo pasarás directamente a la vista de inicio.
+            </p>
+          </div>
 
-        <h1
-          style={{
-            margin: '0 0 8px',
-            fontSize: 'clamp(1.65rem, 3.2vw, 2.25rem)',
-            fontWeight: 900,
-            color: 'var(--text-main)',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Convierte tu hoja de cálculo en un Quiz
-        </h1>
-        <p
-          style={{
-            margin: '0 auto 24px',
-            maxWidth: 590,
-            color: 'var(--text-muted)',
-            fontSize: '1rem',
-            lineHeight: 1.55,
-          }}
-        >
-          Carga archivos <strong>.xlsx</strong>, <strong>.xls</strong> o <strong>.csv</strong>.
-          Detectamos automáticamente fragmentos de código, respuestas múltiples y medimos tu tiempo total.
-        </p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={downloadExcelTemplate}
+            >
+              <Download size={15} />
+              Plantilla .xlsx
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-accent-mint"
+              onClick={onLoadSample}
+            >
+              <FileSpreadsheet size={15} />
+              Cargar ejemplo
+              <ArrowUpRight size={14} />
+            </button>
+          </div>
+        </div>
 
         {/* Dropzone */}
         <div
@@ -102,13 +115,13 @@ export default function UploadTab({ onQuizLoaded, onLoadSample }) {
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           style={{
-            border: `3px dashed ${isDragging ? '#a78bfa' : 'var(--dropzone-border)'}`,
-            background: isDragging ? 'var(--dropzone-bg-active)' : 'var(--dropzone-bg)',
-            borderRadius: 24,
-            padding: '40px 24px',
+            border: `1.5px dashed ${isDragging ? 'var(--accent-lavender)' : 'var(--border-strong)'}`,
+            background: isDragging ? 'var(--accent-lavender-soft)' : 'var(--surface-2)',
+            borderRadius: 12,
+            padding: '44px 24px',
+            textAlign: 'center',
             cursor: 'pointer',
-            transition: 'all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            transform: isDragging ? 'scale(1.015)' : 'scale(1)',
+            transition: 'border-color 0.16s ease, background-color 0.16s ease',
           }}
         >
           <input
@@ -121,182 +134,129 @@ export default function UploadTab({ onQuizLoaded, onLoadSample }) {
 
           <div
             style={{
-              width: 74,
-              height: 74,
-              margin: '0 auto 14px',
-              borderRadius: 22,
-              background: 'linear-gradient(135deg, #c4b5fd, #fbcfe8)',
+              width: 44,
+              height: 44,
+              margin: '0 auto 12px',
+              borderRadius: 10,
+              background: 'var(--surface-1)',
+              border: '1px solid var(--border-hairline)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#4c1d95',
-              boxShadow: '0 8px 20px -6px rgba(139, 92, 246, 0.35)',
+              color: 'var(--accent-lavender)',
             }}
           >
-            <UploadCloud size={36} />
+            <Upload size={20} />
           </div>
 
-          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)' }}>
+          <div style={{ fontSize: '0.98rem', fontWeight: 600, color: 'var(--text-main)' }}>
             {isLoading
-              ? 'Analizando preguntas y detectando código...'
-              : 'Arrastra tu archivo Excel aquí o haz clic para seleccionarlo'}
+              ? 'Procesando archivo y estructurando bloques de código...'
+              : 'Arrastra tu archivo aquí o haz clic para seleccionarlo'}
           </div>
-          <div style={{ marginTop: 6, fontSize: '0.9rem', color: 'var(--text-soft)', fontWeight: 600 }}>
-            Compatible con la plantilla de Kahoot y tablas personalizadas (.xlsx, .xls, .csv)
+          <div style={{ marginTop: 6, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            Formatos soportados: .xlsx, .xls, .csv, .ods
           </div>
         </div>
 
         {errorMsg && (
           <div
-            className="animate-shake"
             style={{
-              marginTop: 18,
-              padding: '13px 16px',
-              borderRadius: 16,
-              background: 'var(--pill-rose-bg)',
-              border: '2px solid var(--pill-rose-border)',
-              color: 'var(--pill-rose-text)',
+              marginTop: 16,
+              padding: '11px 14px',
+              borderRadius: 10,
+              background: 'var(--accent-rose-soft)',
+              border: '1px solid var(--accent-rose-border)',
+              color: 'var(--accent-rose)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              fontWeight: 700,
-              fontSize: '0.94rem',
+              gap: 9,
+              fontWeight: 500,
+              fontSize: '0.88rem',
             }}
           >
-            <AlertCircle size={19} />
+            <AlertCircle size={17} style={{ flexShrink: 0 }} />
             <span>{errorMsg}</span>
           </div>
         )}
-
-        {/* Quick actions */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 12,
-            justifyContent: 'center',
-            marginTop: 22,
-          }}
-        >
-          <button
-            type="button"
-            className="btn-pastel btn-secondary"
-            onClick={downloadExcelTemplate}
-          >
-            <Download size={18} />
-            Descargar plantilla (.xlsx)
-          </button>
-
-          <button
-            type="button"
-            className="btn-pastel btn-mint"
-            onClick={onLoadSample}
-          >
-            <FileSpreadsheet size={18} />
-            Probar con Quiz de ejemplo
-          </button>
-        </div>
       </div>
 
-      {/* Feature Highlights */}
+      {/* Clean 3-column Spec Strip */}
       <div
+        className="surface-card spec-strip"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: 16,
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          overflow: 'hidden',
         }}
       >
         <div
-          className="pastel-card"
           style={{
-            padding: 20,
-            background: 'var(--feature-pink-bg)',
-            borderColor: 'var(--pill-pink-border)',
+            padding: '18px 20px',
+            borderRight: '1px solid var(--border-hairline)',
           }}
         >
           <div
             style={{
-              width: 42,
-              height: 42,
-              borderRadius: 14,
-              background: 'var(--pill-pink-bg)',
-              color: 'var(--pill-pink-text)',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 10,
+              gap: 7,
+              fontSize: '0.86rem',
+              fontWeight: 600,
+              color: 'var(--text-main)',
+              marginBottom: 6,
             }}
           >
-            <InfinityIcon size={22} />
-          </div>
-          <h3 style={{ margin: '0 0 6px', fontSize: '1.02rem', fontWeight: 800 }}>
+            <InfinityIcon size={16} color="var(--accent-rose)" />
             Sin límite de caracteres
-          </h3>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.48 }}>
-            Olvídate del límite de 120 o 75 caracteres. Escribe enunciados largos, casos completos y opciones detalladas.
+          </div>
+          <p style={{ margin: 0, fontSize: '0.83rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            Soporta enunciados extensos y opciones largas sin recortar ni rechazar contenido.
           </p>
         </div>
 
         <div
-          className="pastel-card"
           style={{
-            padding: 20,
-            background: 'var(--feature-purple-bg)',
-            borderColor: 'var(--pill-purple-border)',
+            padding: '18px 20px',
+            borderRight: '1px solid var(--border-hairline)',
           }}
         >
           <div
             style={{
-              width: 42,
-              height: 42,
-              borderRadius: 14,
-              background: 'var(--pill-purple-bg)',
-              color: 'var(--pill-purple-text)',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 10,
+              gap: 7,
+              fontSize: '0.86rem',
+              fontWeight: 600,
+              color: 'var(--text-main)',
+              marginBottom: 6,
             }}
           >
-            <Code2 size={22} />
+            <Code2 size={16} color="var(--accent-lavender)" />
+            Detección de código
           </div>
-          <h3 style={{ margin: '0 0 6px', fontSize: '1.02rem', fontWeight: 800 }}>
-            Detección automática de código
-          </h3>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.48 }}>
-            Usa <code className="inline-code-pill">```python</code> o pega código directo con saltos de línea: lo estructuramos y resaltamos al instante.
+          <p style={{ margin: 0, fontSize: '0.83rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            Formatea bloques <code className="inline-code-pill">```</code> o código multilínea con resaltado de sintaxis.
           </p>
         </div>
 
-        <div
-          className="pastel-card"
-          style={{
-            padding: 20,
-            background: 'var(--feature-mint-bg)',
-            borderColor: 'var(--pill-mint-border)',
-          }}
-        >
+        <div style={{ padding: '18px 20px' }}>
           <div
             style={{
-              width: 42,
-              height: 42,
-              borderRadius: 14,
-              background: 'var(--pill-mint-bg)',
-              color: 'var(--pill-mint-text)',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 10,
+              gap: 7,
+              fontSize: '0.86rem',
+              fontWeight: 600,
+              color: 'var(--text-main)',
+              marginBottom: 6,
             }}
           >
-            <Timer size={22} />
+            <Timer size={16} color="var(--accent-mint)" />
+            Control de tiempo y repaso
           </div>
-          <h3 style={{ margin: '0 0 6px', fontSize: '1.02rem', fontWeight: 800 }}>
-            Cronómetro de tiempo total
-          </h3>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.48 }}>
-            Mide exactamente cuánto tardas en completar el quiz y repasa tus preguntas falladas creando un nuevo quiz al instante.
+          <p style={{ margin: 0, fontSize: '0.83rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            Registra el tiempo total de sesión y genera un nuevo quiz con tus errores al finalizar.
           </p>
         </div>
       </div>

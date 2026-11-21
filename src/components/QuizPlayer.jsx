@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import confetti from 'canvas-confetti';
 import {
   Timer,
   ArrowRight,
   CheckCircle2,
   XCircle,
-  Sparkles,
   Flame,
   Volume2,
   VolumeX,
@@ -18,20 +16,13 @@ import {
   Square,
   Star,
   Hexagon,
+  Layers,
 } from 'lucide-react';
 import RichContent from './RichContent';
 import { formatDurationMs, formatSecondsShort } from '../utils/timeFormat';
 import { playSound } from '../utils/sound';
 
 const SHAPE_ICONS = [Triangle, Diamond, Circle, Square, Star, Hexagon];
-const SHAPE_BG = [
-  '#fb7185',
-  '#38bdf8',
-  '#f59e0b',
-  '#10b981',
-  '#8b5cf6',
-  '#fb923c',
-];
 
 function setsEqual(a, b) {
   if (a.length !== b.length) return false;
@@ -55,7 +46,6 @@ export default function QuizPlayer({
   const [bestStreak, setBestStreak] = useState(0);
   const [results, setResults] = useState([]);
 
-  // Timers
   const quizStartRef = useRef(Date.now());
   const questionStartRef = useRef(Date.now());
   const [totalElapsedMs, setTotalElapsedMs] = useState(0);
@@ -65,7 +55,6 @@ export default function QuizPlayer({
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
-  // Live stopwatch tick
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
@@ -101,12 +90,6 @@ export default function QuizPlayer({
       setStreak(nextStreak);
       setBestStreak((prev) => Math.max(prev, nextStreak));
       playSound('correct', soundEnabled);
-      confetti({
-        particleCount: 42,
-        spread: 62,
-        origin: { y: 0.72 },
-        colors: ['#c4b5fd', '#fbcfe8', '#a7f3d0', '#bae6fd', '#fde68a'],
-      });
     } else {
       setStreak(0);
       playSound('wrong', soundEnabled);
@@ -157,7 +140,6 @@ export default function QuizPlayer({
     setQuestionElapsedMs(0);
   };
 
-  // Keyboard shortcuts (1-6 to pick, Enter to confirm/next)
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -182,7 +164,6 @@ export default function QuizPlayer({
   const progressPercent = ((currentIndex + (isSubmitted ? 1 : 0)) / questions.length) * 100;
   const lastResult = isSubmitted ? results[results.length - 1] : null;
 
-  // Optional suggested time progress
   const suggestedMs = currentQuestion.timeLimit ? currentQuestion.timeLimit * 1000 : null;
   const suggestedRemainingPct = suggestedMs
     ? Math.max(0, Math.min(100, ((suggestedMs - questionElapsedMs) / suggestedMs) * 100))
@@ -190,19 +171,12 @@ export default function QuizPlayer({
   const suggestedExpired = suggestedMs !== null && questionElapsedMs > suggestedMs;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* HUD Header */}
-      <div
-        className="pastel-card"
-        style={{
-          padding: '14px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Minimalist Session HUD */}
+      <div className="surface-card" style={{ overflow: 'hidden' }}>
         <div
           style={{
+            padding: '12px 18px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -210,27 +184,16 @@ export default function QuizPlayer({
             gap: 10,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span
-              style={{
-                background: 'var(--pill-purple-bg)',
-                color: 'var(--pill-purple-text)',
-                padding: '6px 14px',
-                borderRadius: 999,
-                fontWeight: 900,
-                fontSize: '0.9rem',
-                border: '1.5px solid var(--pill-purple-border)',
-              }}
-            >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            <span className="badge badge-lavender">
               Pregunta {currentIndex + 1} / {questions.length}
             </span>
-
             <span
               style={{
                 color: 'var(--text-muted)',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                maxWidth: 220,
+                fontWeight: 500,
+                fontSize: '0.85rem',
+                maxWidth: 240,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -241,96 +204,47 @@ export default function QuizPlayer({
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             {streak >= 2 && (
-              <span
-                className="animate-pop"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  background: 'var(--pill-butter-bg)',
-                  color: 'var(--pill-butter-text)',
-                  padding: '6px 12px',
-                  borderRadius: 999,
-                  fontWeight: 800,
-                  fontSize: '0.86rem',
-                  border: '1.5px solid var(--pill-butter-border)',
-                }}
-              >
-                <Flame size={16} fill="#f59e0b" color="#d97706" />
-                Racha x{streak}
+              <span className="badge badge-amber">
+                <Flame size={13} />
+                Racha {streak}
               </span>
             )}
 
-            {/* Total Elapsed Stopwatch */}
             <div
-              title="Tiempo total que llevas respondiendo el quiz"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 7,
-                background: 'var(--pill-sky-bg)',
-                color: 'var(--pill-sky-text)',
-                padding: '6px 14px',
-                borderRadius: 999,
-                fontWeight: 900,
-                fontSize: '0.94rem',
-                border: '1.5px solid var(--pill-sky-border)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
+              className="badge badge-sky font-mono"
+              title="Tiempo total de la sesión"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              <Timer size={17} />
-              <span>Total: {formatDurationMs(totalElapsedMs)}</span>
+              <Timer size={14} />
+              {formatDurationMs(totalElapsedMs)}
             </div>
 
-            {/* Per-question elapsed (toggleable) */}
             {settings.showQuestionTimer ? (
               <button
                 type="button"
                 onClick={onToggleQuestionTimer}
                 title="Tiempo en esta pregunta (clic para ocultar)"
+                className="badge font-mono"
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  background: 'var(--pill-purple-bg)',
-                  color: 'var(--pill-purple-text)',
-                  padding: '6px 12px',
-                  borderRadius: 999,
-                  fontWeight: 800,
-                  fontSize: '0.86rem',
-                  fontVariantNumeric: 'tabular-nums',
-                  border: '1.5px solid var(--pill-purple-border)',
                   cursor: 'pointer',
-                  fontFamily: 'inherit',
+                  fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                <Clock size={15} />
+                <Clock size={13} />
                 {formatSecondsShort(questionElapsedMs)}
-                <EyeOff size={13} style={{ opacity: 0.65 }} />
+                <EyeOff size={12} style={{ opacity: 0.65 }} />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onToggleQuestionTimer}
                 title="Mostrar tiempo por pregunta"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  background: 'var(--surface-btn)',
-                  color: 'var(--text-muted)',
-                  padding: '6px 11px',
-                  borderRadius: 999,
-                  fontWeight: 700,
-                  fontSize: '0.8rem',
-                  border: '1.5px solid var(--surface-btn-border)',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                }}
+                className="badge"
+                style={{ cursor: 'pointer', color: 'var(--text-muted)' }}
               >
-                <Clock size={14} />
+                <Clock size={13} />
                 Mostrar tiempo/preg.
               </button>
             )}
@@ -339,65 +253,42 @@ export default function QuizPlayer({
               type="button"
               onClick={onToggleSound}
               title={soundEnabled ? 'Silenciar efectos' : 'Activar sonidos'}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 12,
-                border: '1.5px solid var(--surface-btn-border)',
-                background: 'var(--surface-btn)',
-                color: 'var(--pill-purple-text)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
+              className="icon-btn"
+              style={{ width: 30, height: 30, borderRadius: 7 }}
             >
-              {soundEnabled ? <Volume2 size={17} /> : <VolumeX size={17} />}
+              {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
             </button>
           </div>
         </div>
 
-        {/* Main Progress Bar */}
-        <div
-          style={{
-            height: 10,
-            borderRadius: 999,
-            background: 'var(--progress-track)',
-            overflow: 'hidden',
-          }}
-        >
+        {/* Optional Suggested Time Reference */}
+        {settings.showSuggestedTimer && suggestedMs !== null && (
           <div
             style={{
-              height: '100%',
-              width: `${progressPercent}%`,
-              borderRadius: 999,
-              background: 'linear-gradient(90deg, #a78bfa, #f472b6, #6ee7b7)',
-              transition: 'width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              padding: '0 18px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
             }}
-          />
-        </div>
-
-        {/* Optional Suggested Time Limit Bar */}
-        {settings.showSuggestedTimer && suggestedMs !== null && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          >
             <span
               style={{
-                fontSize: '0.76rem',
-                fontWeight: 800,
-                color: suggestedExpired ? 'var(--pill-rose-text)' : 'var(--pill-butter-text)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: suggestedExpired ? 'var(--accent-rose)' : 'var(--accent-amber)',
                 whiteSpace: 'nowrap',
               }}
             >
               {suggestedExpired
-                ? `Tiempo sugerido (${currentQuestion.timeLimit}s) cumplido — ¡toma tu tiempo!`
+                ? `Tiempo sugerido (${currentQuestion.timeLimit}s) superado`
                 : `Sugerido: ${Math.ceil(Math.max(0, suggestedMs - questionElapsedMs) / 1000)}s`}
             </span>
             <div
               style={{
                 flex: 1,
-                height: 6,
+                height: 3,
                 borderRadius: 999,
-                background: 'var(--suggested-track)',
+                background: 'var(--surface-3)',
                 overflow: 'hidden',
               }}
             >
@@ -405,57 +296,53 @@ export default function QuizPlayer({
                 style={{
                   height: '100%',
                   width: `${suggestedRemainingPct}%`,
-                  borderRadius: 999,
-                  background: suggestedExpired ? '#fda4af' : '#fbbf24',
+                  background: suggestedExpired ? 'var(--accent-rose)' : 'var(--accent-amber)',
                   transition: 'width 0.15s linear',
                 }}
               />
             </div>
           </div>
         )}
+
+        {/* Slim Progress Track */}
+        <div
+          style={{
+            height: 3,
+            background: 'var(--surface-2)',
+            width: '100%',
+          }}
+        >
+          <div
+            style={{
+              height: '100%',
+              width: `${progressPercent}%`,
+              background: 'var(--accent-lavender)',
+              transition: 'width 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+            }}
+          />
+        </div>
       </div>
 
       {/* Question Card */}
       <div
         key={`${currentQuestion.id}-${currentIndex}`}
-        className="pastel-card animate-fade-up"
-        style={{ padding: '26px 26px 24px' }}
+        className="surface-card animate-enter"
+        style={{ padding: '24px 26px' }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            flexWrap: 'wrap',
-            marginBottom: 14,
-          }}
-        >
-          {currentQuestion.isMultipleChoice && (
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                background: 'var(--pill-pink-bg)',
-                color: 'var(--pill-pink-text)',
-                padding: '5px 12px',
-                borderRadius: 999,
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                border: '1.5px solid var(--pill-pink-border)',
-              }}
-            >
-              <Sparkles size={14} />
-              Selección múltiple — elige todas las correctas
+        {currentQuestion.isMultipleChoice && (
+          <div style={{ marginBottom: 12 }}>
+            <span className="badge badge-lavender">
+              <Layers size={13} />
+              Selección múltiple — marca todas las opciones correctas
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         <RichContent
           segments={currentQuestion.questionSegments}
           textStyle={{
-            fontSize: 'clamp(1.1rem, 2.2vw, 1.35rem)',
-            fontWeight: 800,
+            fontSize: 'clamp(1.04rem, 1.8vw, 1.22rem)',
+            fontWeight: 600,
             color: 'var(--text-main)',
           }}
         />
@@ -464,12 +351,11 @@ export default function QuizPlayer({
       {/* Answer Options Grid */}
       <div
         key={`answers-${currentQuestion.id}-${currentIndex}`}
-        className="answer-grid animate-fade-up"
+        className="answer-grid animate-enter"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-          gap: 14,
-          animationDelay: '0.06s',
+          gap: 12,
         }}
       >
         {currentQuestion.answers.map((ans, idx) => {
@@ -490,138 +376,138 @@ export default function QuizPlayer({
           }
 
           const ShapeIcon = SHAPE_ICONS[idx % 6];
+
           return (
             <button
               key={idx}
               type="button"
               disabled={isSubmitted}
               onClick={() => handleOptionClick(idx)}
-              className={`answer-card answer-theme-${idx % 6} ${statusClass}`}
+              className={`option-card ${statusClass}`}
             >
               <div
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 12,
-                  background: isSubmitted && isCorrectOption
-                    ? '#10b981'
+                className={`option-shape-badge ${
+                  isSubmitted && isCorrectOption
+                    ? 'option-tone-3'
                     : isSubmitted && isSelected && !isCorrectOption
-                    ? '#f43f5e'
-                    : SHAPE_BG[idx % 6],
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                }}
+                    ? 'option-tone-0'
+                    : `option-tone-${idx % 6}`
+                }`}
               >
                 {isSubmitted && isCorrectOption ? (
-                  <Check size={20} strokeWidth={3} />
+                  <Check size={15} strokeWidth={2.8} />
                 ) : (
-                  <ShapeIcon size={18} fill="currentColor" strokeWidth={2.2} />
+                  <ShapeIcon size={14} strokeWidth={2.2} />
                 )}
               </div>
 
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
                 <RichContent
                   segments={ans.segments}
                   compact
                   textStyle={{
-                    fontWeight: 800,
-                    fontSize: '0.98rem',
+                    fontWeight: 500,
+                    fontSize: '0.94rem',
                   }}
                 />
               </div>
 
-              {!isSubmitted && currentQuestion.isMultipleChoice && (
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 8,
-                    border: `2.5px solid ${isSelected ? '#7c3aed' : 'rgba(0,0,0,0.18)'}`,
-                    background: isSelected ? '#8b5cf6' : 'rgba(255,255,255,0.7)',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {isSelected && <Check size={15} strokeWidth={3} />}
-                </div>
-              )}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  flexShrink: 0,
+                  marginTop: 2,
+                }}
+              >
+                {!isSubmitted && currentQuestion.isMultipleChoice && (
+                  <span
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: 5,
+                      border: `1.5px solid ${
+                        isSelected ? 'var(--accent-lavender)' : 'var(--border-strong)'
+                      }`,
+                      background: isSelected ? 'var(--accent-lavender)' : 'transparent',
+                      color: '#13121c',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {isSelected && <Check size={12} strokeWidth={3} />}
+                  </span>
+                )}
+                <span className="kbd-hint">{idx + 1}</span>
+              </div>
             </button>
           );
         })}
       </div>
 
-      {/* Action / Feedback Footer */}
+      {/* Multi-select Confirm */}
       {!isSubmitted && currentQuestion.isMultipleChoice && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
           <button
             type="button"
-            className="btn-pastel btn-primary"
+            className="btn btn-primary btn-lg"
             disabled={selectedIndices.length === 0}
             onClick={() => evaluateAnswer(selectedIndices)}
           >
-            <CheckCircle2 size={20} />
-            Comprobar respuestas ({selectedIndices.length} seleccionadas)
+            <CheckCircle2 size={17} />
+            Confirmar ({selectedIndices.length})
           </button>
         </div>
       )}
 
+      {/* Clean Feedback Bar */}
       {isSubmitted && lastResult && (
         <div
-          className="pastel-card animate-pop"
+          className="surface-card animate-enter"
           style={{
-            padding: '18px 22px',
+            padding: '14px 18px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: 14,
-            background: lastResult.isCorrect
-              ? 'var(--feedback-correct-bg)'
-              : 'var(--feedback-wrong-bg)',
+            gap: 12,
             borderColor: lastResult.isCorrect
-              ? 'var(--pill-mint-border)'
-              : 'var(--pill-rose-border)',
+              ? 'var(--accent-mint-border)'
+              : 'var(--accent-rose-border)',
+            background: lastResult.isCorrect
+              ? 'var(--accent-mint-soft)'
+              : 'var(--accent-rose-soft)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
             {lastResult.isCorrect ? (
-              <CheckCircle2 size={30} color="#10b981" />
+              <CheckCircle2 size={22} color="var(--accent-mint)" />
             ) : (
-              <XCircle size={30} color="#fb7185" />
+              <XCircle size={22} color="var(--accent-rose)" />
             )}
             <div>
               <div
                 style={{
-                  fontWeight: 900,
-                  fontSize: '1.08rem',
-                  color: lastResult.isCorrect
-                    ? 'var(--feedback-correct-title)'
-                    : 'var(--feedback-wrong-title)',
+                  fontWeight: 600,
+                  fontSize: '0.96rem',
+                  color: lastResult.isCorrect ? 'var(--accent-mint)' : 'var(--accent-rose)',
                 }}
               >
                 {lastResult.isCorrect
-                  ? '¡Excelente! Respuesta correcta'
-                  : 'Casi — revisa las opciones marcadas en verde'}
+                  ? 'Respuesta correcta'
+                  : 'Respuesta incorrecta — revisa la opción marcada en verde'}
               </div>
               {settings.showQuestionTimer && (
                 <div
                   style={{
-                    fontSize: '0.88rem',
-                    fontWeight: 700,
-                    color: lastResult.isCorrect
-                      ? 'var(--feedback-correct-sub)'
-                      : 'var(--feedback-wrong-sub)',
+                    fontSize: '0.8rem',
+                    color: 'var(--text-secondary)',
+                    marginTop: 1,
                   }}
                 >
-                  Tiempo en esta pregunta: {formatSecondsShort(lastResult.timeSpentMs)}
+                  Tiempo empleado: {formatSecondsShort(lastResult.timeSpentMs)}
                 </div>
               )}
             </div>
@@ -629,11 +515,11 @@ export default function QuizPlayer({
 
           <button
             type="button"
-            className="btn-pastel btn-primary"
+            className="btn btn-primary"
             onClick={handleNext}
           >
-            {isLastQuestion ? 'Ver resultados finales' : 'Siguiente pregunta'}
-            <ArrowRight size={19} />
+            {isLastQuestion ? 'Ver resultados' : 'Siguiente'}
+            <ArrowRight size={16} />
           </button>
         </div>
       )}

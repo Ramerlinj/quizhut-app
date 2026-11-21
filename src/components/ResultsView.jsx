@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 import {
-  Trophy,
+  Award,
   Timer,
   RotateCcw,
   Upload,
@@ -10,7 +10,7 @@ import {
   Zap,
   Flame,
   Clock,
-  Sparkles,
+  RefreshCw,
   Download,
   Check,
   X,
@@ -27,6 +27,8 @@ export default function ResultsView({
   onUploadNew,
   onCreateWrongQuiz,
 }) {
+  const [filter, setFilter] = useState('all'); // 'all' | 'wrong'
+
   const { results, totalTimeMs, bestStreak } = summary;
   const totalQuestions = results.length;
   const correctCount = results.filter((r) => r.isCorrect).length;
@@ -35,292 +37,296 @@ export default function ResultsView({
   const avgMs = totalQuestions > 0 ? totalTimeMs / totalQuestions : 0;
 
   useEffect(() => {
-    const end = Date.now() + 900;
-    const colors = ['#c4b5fd', '#fbcfe8', '#a7f3d0', '#bae6fd', '#fde68a'];
-    (function frame() {
+    if (accuracy >= 80) {
       confetti({
-        particleCount: 4,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors,
+        particleCount: 48,
+        spread: 60,
+        origin: { y: 0.65 },
+        colors: ['#c4b5fd', '#86dfba', '#93c8f5', '#ecc982'],
       });
-      confetti({
-        particleCount: 4,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors,
-      });
-      if (Date.now() < end) requestAnimationFrame(frame);
-    })();
-  }, []);
+    }
+  }, [accuracy]);
 
-  const message =
+  const headline =
     accuracy === 100
-      ? '¡Puntuación perfecta!'
+      ? 'Evaluación completada sin errores'
       : accuracy >= 75
-      ? '¡Muy buen trabajo!'
+      ? 'Buen resultado general'
       : accuracy >= 50
-      ? '¡Buen intento, sigue practicando!'
-      : '¡Buena práctica! Inténtalo otra vez';
+      ? 'Evaluación completada'
+      : 'Sesión finalizada — repasa los errores';
+
+  const visibleResults =
+    filter === 'wrong'
+      ? results
+          .map((item, idx) => ({ item, idx }))
+          .filter(({ item }) => !item.isCorrect)
+      : results.map((item, idx) => ({ item, idx }));
 
   return (
-    <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-      {/* Hero Result Card */}
-      <div className="pastel-card" style={{ padding: '34px 26px', textAlign: 'center' }}>
+    <div className="animate-enter" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* Executive Summary Card */}
+      <div className="surface-card" style={{ padding: '28px 28px 24px' }}>
         <div
-          className="animate-bounce-slow"
           style={{
-            width: 82,
-            height: 82,
-            margin: '0 auto 14px',
-            borderRadius: 26,
-            background: 'linear-gradient(135deg, #fde68a, #fbcfe8)',
-            color: '#78350f',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 10px 24px -8px rgba(245, 158, 11, 0.4)',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 16,
+            marginBottom: 22,
           }}
         >
-          <Trophy size={42} />
+          <div>
+            <span className="badge badge-lavender" style={{ marginBottom: 10 }}>
+              <Award size={13} />
+              {quizTitle}
+            </span>
+            <h1
+              style={{
+                margin: '0 0 6px',
+                fontSize: '1.55rem',
+                fontWeight: 700,
+                color: 'var(--text-main)',
+              }}
+            >
+              {headline}
+            </h1>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              Resumen de rendimiento, tiempo de ejecución y desglose por pregunta.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-secondary" onClick={onUploadNew}>
+              <Upload size={15} />
+              Otro archivo
+            </button>
+            <button type="button" className="btn btn-primary" onClick={onRetry}>
+              <RotateCcw size={15} />
+              Reintentar
+            </button>
+          </div>
         </div>
 
+        {/* 4-column KPI Strip */}
         <div
-          style={{
-            fontSize: '0.9rem',
-            fontWeight: 800,
-            color: 'var(--pill-purple-text)',
-            marginBottom: 4,
-          }}
-        >
-          {quizTitle}
-        </div>
-        <h1
-          style={{
-            margin: '0 0 8px',
-            fontSize: 'clamp(1.65rem, 3.2vw, 2.2rem)',
-            fontWeight: 900,
-            color: 'var(--text-main)',
-          }}
-        >
-          {message}
-        </h1>
-        <p style={{ margin: '0 auto 24px', color: 'var(--text-muted)', fontSize: '0.98rem' }}>
-          Aquí tienes tu resumen de aciertos y el tiempo exacto que te tomó completarlo.
-        </p>
-
-        {/* Stats Grid */}
-        <div
+          className="metric-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))',
-            gap: 14,
-            marginBottom: 26,
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 12,
+            background: 'var(--surface-2)',
+            overflow: 'hidden',
           }}
         >
-          <div
-            style={{
-              background: 'var(--pill-mint-bg)',
-              border: '2px solid var(--pill-mint-border)',
-              color: 'var(--pill-mint-text)',
-              borderRadius: 20,
-              padding: '16px 14px',
-            }}
-          >
-            <div style={{ fontWeight: 800, fontSize: '0.84rem', marginBottom: 4, opacity: 0.9 }}>
-              Aciertos
+          <div style={{ padding: '16px 18px', borderRight: '1px solid var(--border-hairline)' }}>
+            <div
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
+              }}
+            >
+              Precisión
             </div>
-            <div style={{ fontSize: '1.85rem', fontWeight: 900 }}>
-              {correctCount}/{totalQuestions}
+            <div
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: accuracy >= 75 ? 'var(--accent-mint)' : 'var(--text-main)',
+              }}
+            >
+              {accuracy}%
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.9 }}>
-              {accuracy}% de precisión
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+              {correctCount} de {totalQuestions} correctas
             </div>
           </div>
 
-          <div
-            style={{
-              background: 'var(--pill-sky-bg)',
-              border: '2px solid var(--pill-sky-border)',
-              color: 'var(--pill-sky-text)',
-              borderRadius: 20,
-              padding: '16px 14px',
-            }}
-          >
+          <div style={{ padding: '16px 18px', borderRight: '1px solid var(--border-hairline)' }}>
             <div
               style={{
-                fontWeight: 800,
-                fontSize: '0.84rem',
-                marginBottom: 4,
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
                 gap: 5,
-                opacity: 0.9,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
               }}
             >
-              <Timer size={15} />
+              <Timer size={13} color="var(--accent-sky)" />
               Tiempo total
             </div>
             <div
+              className="font-mono"
               style={{
-                fontSize: '1.85rem',
-                fontWeight: 900,
+                fontSize: '1.45rem',
+                fontWeight: 600,
+                color: 'var(--text-main)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
               {formatDurationMs(totalTimeMs, true)}
             </div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, opacity: 0.85 }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 2 }}>
               min : seg
             </div>
           </div>
 
-          <div
-            style={{
-              background: 'var(--pill-purple-bg)',
-              border: '2px solid var(--pill-purple-border)',
-              color: 'var(--pill-purple-text)',
-              borderRadius: 20,
-              padding: '16px 14px',
-            }}
-          >
+          <div style={{ padding: '16px 18px', borderRight: '1px solid var(--border-hairline)' }}>
             <div
               style={{
-                fontWeight: 800,
-                fontSize: '0.84rem',
-                marginBottom: 4,
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
                 gap: 5,
-                opacity: 0.9,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
               }}
             >
-              <Zap size={15} />
-              Promedio / pregunta
+              <Zap size={13} color="var(--accent-lavender)" />
+              Promedio / preg.
             </div>
-            <div style={{ fontSize: '1.85rem', fontWeight: 900 }}>
+            <div
+              className="font-mono"
+              style={{ fontSize: '1.45rem', fontWeight: 600, color: 'var(--text-main)' }}
+            >
               {formatSecondsShort(avgMs)}
             </div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, opacity: 0.85 }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 2 }}>
               ritmo medio
             </div>
           </div>
 
-          <div
-            style={{
-              background: 'var(--pill-butter-bg)',
-              border: '2px solid var(--pill-butter-border)',
-              color: 'var(--pill-butter-text)',
-              borderRadius: 20,
-              padding: '16px 14px',
-            }}
-          >
+          <div style={{ padding: '16px 18px' }}>
             <div
               style={{
-                fontWeight: 800,
-                fontSize: '0.84rem',
-                marginBottom: 4,
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
                 gap: 5,
-                opacity: 0.9,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
               }}
             >
-              <Flame size={15} />
+              <Flame size={13} color="var(--accent-amber)" />
               Mejor racha
             </div>
-            <div style={{ fontSize: '1.85rem', fontWeight: 900 }}>
+            <div
+              className="font-mono"
+              style={{ fontSize: '1.45rem', fontWeight: 600, color: 'var(--text-main)' }}
+            >
               {bestStreak}
             </div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, opacity: 0.85 }}>
-              seguidas
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+              aciertos seguidos
             </div>
           </div>
         </div>
 
-        {/* Retry / Upload Actions */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
-          <button type="button" className="btn-pastel btn-primary" onClick={onRetry}>
-            <RotateCcw size={19} />
-            Volver a intentar
-          </button>
-          <button type="button" className="btn-pastel btn-secondary" onClick={onUploadNew}>
-            <Upload size={18} />
-            Subir otro Excel
-          </button>
-        </div>
-
-        {/* Create Quiz from Wrong Questions Callout */}
+        {/* Review Quiz Builder for Wrong Questions */}
         {wrongQuestions.length > 0 && (
           <div
-            className="animate-pop"
             style={{
-              marginTop: 22,
-              padding: '18px 20px',
-              borderRadius: 22,
-              background: 'var(--pill-rose-bg)',
-              border: '2px solid var(--pill-rose-border)',
+              marginTop: 18,
+              padding: '16px 18px',
+              borderRadius: 12,
+              background: 'var(--accent-rose-soft)',
+              border: '1px solid var(--accent-rose-border)',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: 12,
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 14,
             }}
           >
-            <div
-              style={{
-                color: 'var(--pill-rose-text)',
-                fontWeight: 900,
-                fontSize: '1.02rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <Sparkles size={18} />
-              Fallaste {wrongQuestions.length}{' '}
-              {wrongQuestions.length === 1 ? 'pregunta' : 'preguntas'} — ¿quieres reforzarlas?
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.94rem', color: 'var(--accent-rose)' }}>
+                {wrongQuestions.length}{' '}
+                {wrongQuestions.length === 1 ? 'pregunta incorrecta' : 'preguntas incorrectas'}
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                Genera una nueva evaluación enfocada únicamente en tus fallos o expórtalas a Excel.
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button
                 type="button"
-                className="btn-pastel btn-coral"
-                onClick={() => onCreateWrongQuiz(wrongQuestions)}
+                className="btn btn-secondary"
+                onClick={() => exportQuizToExcel(wrongQuestions, `Repaso_${quizTitle}`)}
               >
-                <Sparkles size={18} />
-                Crear quiz con las {wrongQuestions.length} falladas
+                <Download size={15} />
+                Exportar .xlsx
               </button>
 
               <button
                 type="button"
-                className="btn-pastel btn-secondary"
-                onClick={() => exportQuizToExcel(wrongQuestions, `Repaso_${quizTitle}`)}
+                className="btn btn-accent-rose"
+                onClick={() => onCreateWrongQuiz(wrongQuestions)}
               >
-                <Download size={17} />
-                Descargar falladas (.xlsx)
+                <RefreshCw size={15} />
+                Crear quiz con falladas ({wrongQuestions.length})
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Detailed Breakdown */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <h2 style={{ margin: '4px 6px', fontSize: '1.2rem', fontWeight: 900 }}>
-          Revisión por pregunta
+      {/* Review List Header & Filter */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 10,
+          marginTop: 4,
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>
+          Revisión detallada
         </h2>
 
-        {results.map((item, idx) => {
+        {wrongQuestions.length > 0 && (
+          <div className="segmented-nav">
+            <button
+              type="button"
+              className={`segmented-tab ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              Todas ({totalQuestions})
+            </button>
+            <button
+              type="button"
+              className={`segmented-tab ${filter === 'wrong' ? 'active' : ''}`}
+              onClick={() => setFilter('wrong')}
+            >
+              Incorrectas ({wrongQuestions.length})
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Detailed Cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {visibleResults.map(({ item, idx }) => {
           const { question, selectedIndices, isCorrect, timeSpentMs } = item;
           return (
             <div
               key={`${question.id}-${idx}`}
-              className="pastel-card"
+              className="surface-card"
               style={{
-                padding: '20px 22px',
-                borderColor: isCorrect ? 'var(--pill-mint-border)' : 'var(--pill-rose-border)',
+                padding: '18px 20px',
+                borderColor: isCorrect
+                  ? 'var(--border-hairline)'
+                  : 'var(--accent-rose-border)',
               }}
             >
               <div
@@ -335,42 +341,21 @@ export default function ResultsView({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {isCorrect ? (
-                    <CheckCircle2 size={21} color="#10b981" />
+                    <CheckCircle2 size={17} color="var(--accent-mint)" />
                   ) : (
-                    <XCircle size={21} color="#fb7185" />
+                    <XCircle size={17} color="var(--accent-rose)" />
                   )}
-                  <span style={{ fontWeight: 900, fontSize: '0.96rem' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
                     Pregunta {idx + 1}
                   </span>
-                  <span
-                    style={{
-                      background: isCorrect ? 'var(--pill-mint-bg)' : 'var(--pill-rose-bg)',
-                      color: isCorrect ? 'var(--pill-mint-text)' : 'var(--pill-rose-text)',
-                      padding: '3px 10px',
-                      borderRadius: 999,
-                      fontSize: '0.78rem',
-                      fontWeight: 800,
-                    }}
-                  >
+                  <span className={`badge ${isCorrect ? 'badge-mint' : 'badge-rose'}`}>
                     {isCorrect ? 'Correcta' : 'Incorrecta'}
                   </span>
                 </div>
 
                 {showQuestionTimer && (
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      background: 'var(--pill-purple-bg)',
-                      color: 'var(--pill-purple-text)',
-                      padding: '4px 11px',
-                      borderRadius: 999,
-                      fontSize: '0.82rem',
-                      fontWeight: 800,
-                    }}
-                  >
-                    <Clock size={14} />
+                  <span className="badge font-mono">
+                    <Clock size={12} />
                     {formatSecondsShort(timeSpentMs)}
                   </span>
                 )}
@@ -378,12 +363,12 @@ export default function ResultsView({
 
               <RichContent
                 segments={question.questionSegments}
-                textStyle={{ fontWeight: 800, fontSize: '1rem' }}
+                textStyle={{ fontWeight: 600, fontSize: '0.96rem' }}
               />
 
               <div
                 style={{
-                  marginTop: 14,
+                  marginTop: 12,
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
                   gap: 8,
@@ -393,24 +378,24 @@ export default function ResultsView({
                   const wasPicked = selectedIndices.includes(aIdx);
                   const isRightAns = question.correctIndices.includes(aIdx);
 
-                  let bg = 'var(--surface-neutral)';
-                  let border = 'var(--surface-neutral-border)';
-                  let color = 'var(--text-main)';
+                  let bg = 'var(--surface-2)';
+                  let border = 'var(--border-hairline)';
+                  let color = 'var(--text-secondary)';
                   let tag = null;
                   let tagIcon = null;
 
                   if (isRightAns) {
-                    bg = 'var(--pill-mint-bg)';
-                    border = 'var(--pill-mint-border)';
-                    color = 'var(--pill-mint-text)';
+                    bg = 'var(--accent-mint-soft)';
+                    border = 'var(--accent-mint-border)';
+                    color = 'var(--accent-mint)';
                     tag = wasPicked ? 'Tu respuesta correcta' : 'Respuesta correcta';
-                    tagIcon = <Check size={13} strokeWidth={3} />;
+                    tagIcon = <Check size={12} strokeWidth={2.8} />;
                   } else if (wasPicked) {
-                    bg = 'var(--pill-rose-bg)';
-                    border = 'var(--pill-rose-border)';
-                    color = 'var(--pill-rose-text)';
+                    bg = 'var(--accent-rose-soft)';
+                    border = 'var(--accent-rose-border)';
+                    color = 'var(--accent-rose)';
                     tag = 'Tu elección';
-                    tagIcon = <X size={13} strokeWidth={3} />;
+                    tagIcon = <X size={12} strokeWidth={2.8} />;
                   }
 
                   return (
@@ -418,12 +403,12 @@ export default function ResultsView({
                       key={aIdx}
                       style={{
                         padding: '10px 12px',
-                        borderRadius: 14,
+                        borderRadius: 9,
                         background: bg,
-                        border: `1.5px solid ${border}`,
+                        border: `1px solid ${border}`,
                         color,
-                        fontSize: '0.88rem',
-                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
                       }}
                     >
                       {tag && (
@@ -432,8 +417,8 @@ export default function ResultsView({
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 4,
-                            fontSize: '0.74rem',
-                            fontWeight: 900,
+                            fontSize: '0.73rem',
+                            fontWeight: 600,
                             marginBottom: 4,
                           }}
                         >

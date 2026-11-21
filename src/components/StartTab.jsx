@@ -11,9 +11,48 @@ import {
   AlertTriangle,
   Upload,
   Clock,
-  Sparkles,
+  Layers,
 } from 'lucide-react';
 import RichContent from './RichContent';
+
+function SettingToggleRow({ icon: Icon, label, description, checked, onToggle }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onToggle}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 16,
+        width: '100%',
+        textAlign: 'left',
+        padding: '13px 16px',
+        background: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+        color: 'var(--text-main)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 11 }}>
+        <Icon size={17} color="var(--text-muted)" style={{ marginTop: 2, flexShrink: 0 }} />
+        <div>
+          <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{label}</div>
+          {description && (
+            <div style={{ fontSize: '0.79rem', color: 'var(--text-muted)', marginTop: 2 }}>
+              {description}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <span className={`toggle-switch ${checked ? 'is-on' : ''}`} aria-hidden="true" />
+    </button>
+  );
+}
 
 export default function StartTab({
   quiz,
@@ -28,251 +67,215 @@ export default function StartTab({
   const hasAnyTimeLimit = quiz.questions.some((q) => q.timeLimit !== null);
 
   return (
-    <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div className="pastel-card" style={{ padding: '32px 28px', textAlign: 'center' }}>
-        <div
-          className="animate-pop"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'var(--pill-mint-bg)',
-            color: 'var(--pill-mint-text)',
-            padding: '7px 16px',
-            borderRadius: 999,
-            fontWeight: 800,
-            fontSize: '0.88rem',
-            border: '1.5px solid var(--pill-mint-border)',
-            marginBottom: 14,
-          }}
-        >
-          <CheckCircle2 size={17} />
-          ¡Quiz listo para responder!
-        </div>
-
-        <h1
-          style={{
-            margin: '0 0 8px',
-            fontSize: 'clamp(1.6rem, 3vw, 2.15rem)',
-            fontWeight: 900,
-            color: 'var(--text-main)',
-          }}
-        >
-          {quiz.title}
-        </h1>
-        <p style={{ margin: '0 auto 24px', maxWidth: 540, color: 'var(--text-muted)', fontSize: '0.98rem' }}>
-          Todo está listo. Cuando presiones iniciar, comenzará el cronómetro para medir cuánto tiempo te toma responder todo el quiz.
-        </p>
-
-        {/* Stats Pills */}
+    <div className="animate-enter" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div className="surface-card" style={{ padding: '28px 28px 24px' }}>
+        {/* Header */}
         <div
           style={{
             display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
             flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: 12,
-            marginBottom: 26,
+            gap: 14,
+            marginBottom: 22,
           }}
         >
-          <div
-            style={{
-              background: 'var(--pill-purple-bg)',
-              color: 'var(--pill-purple-text)',
-              border: '1.5px solid var(--pill-purple-border)',
-              padding: '10px 16px',
-              borderRadius: 16,
-              fontWeight: 800,
-              fontSize: '0.92rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <ListChecks size={18} />
-            {quiz.questions.length} {quiz.questions.length === 1 ? 'pregunta' : 'preguntas'}
-          </div>
-
-          <div
-            style={{
-              background: 'var(--pill-sky-bg)',
-              color: 'var(--pill-sky-text)',
-              border: '1.5px solid var(--pill-sky-border)',
-              padding: '10px 16px',
-              borderRadius: 16,
-              fontWeight: 800,
-              fontSize: '0.92rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <Code2 size={18} />
-            {quiz.codeQuestionsCount} con código detectado
-          </div>
-
-          {multiCount > 0 && (
-            <div
+          <div>
+            <span className="badge badge-mint" style={{ marginBottom: 10 }}>
+              <CheckCircle2 size={13} />
+              Archivo cargado
+            </span>
+            <h1
               style={{
-                background: 'var(--pill-pink-bg)',
-                color: 'var(--pill-pink-text)',
-                border: '1.5px solid var(--pill-pink-border)',
-                padding: '10px 16px',
-                borderRadius: 16,
-                fontWeight: 800,
-                fontSize: '0.92rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
+                margin: '0 0 6px',
+                fontSize: '1.55rem',
+                fontWeight: 700,
+                color: 'var(--text-main)',
               }}
             >
-              <Sparkles size={18} />
-              {multiCount} de selección múltiple
-            </div>
-          )}
-
-          <div
-            style={{
-              background: 'var(--pill-butter-bg)',
-              color: 'var(--pill-butter-text)',
-              border: '1.5px solid var(--pill-butter-border)',
-              padding: '10px 16px',
-              borderRadius: 16,
-              fontWeight: 800,
-              fontSize: '0.92rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <Timer size={18} />
-            Cronómetro activo
+              {quiz.title}
+            </h1>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              Revisa la configuración de la sesión antes de comenzar. El cronómetro total iniciará al empezar.
+            </p>
           </div>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onBackToUpload}
+          >
+            <Upload size={15} />
+            Cambiar archivo
+          </button>
         </div>
 
-        {/* Settings */}
+        {/* Structured Metrics Strip */}
         <div
+          className="metric-grid"
           style={{
-            maxWidth: 520,
-            margin: '0 auto 26px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-            textAlign: 'left',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 12,
+            background: 'var(--surface-2)',
+            marginBottom: 22,
+            overflow: 'hidden',
           }}
         >
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-              padding: '12px 16px',
-              borderRadius: 16,
-              background: 'var(--surface-subtle)',
-              border: '1.5px solid var(--surface-subtle-border)',
-              cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '0.93rem',
-              color: 'var(--text-main)',
-            }}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9 }}>
-              <Shuffle size={17} color="#a78bfa" />
-              Mezclar orden de las preguntas
-            </span>
-            <input
-              type="checkbox"
-              checked={settings.shuffleQuestions}
-              onChange={(e) =>
-                onChangeSettings({ ...settings, shuffleQuestions: e.target.checked })
-              }
-              style={{ width: 19, height: 19, accentColor: '#8b5cf6', cursor: 'pointer' }}
-            />
-          </label>
-
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-              padding: '12px 16px',
-              borderRadius: 16,
-              background: 'var(--surface-subtle)',
-              border: '1.5px solid var(--surface-subtle-border)',
-              cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '0.93rem',
-              color: 'var(--text-main)',
-            }}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9 }}>
-              <Clock size={17} color="#a78bfa" />
-              Mostrar tiempo por pregunta
-            </span>
-            <input
-              type="checkbox"
-              checked={settings.showQuestionTimer}
-              onChange={(e) =>
-                onChangeSettings({ ...settings, showQuestionTimer: e.target.checked })
-              }
-              style={{ width: 19, height: 19, accentColor: '#8b5cf6', cursor: 'pointer' }}
-            />
-          </label>
-
-          {hasAnyTimeLimit && (
-            <label
+          <div style={{ padding: '14px 16px', borderRight: '1px solid var(--border-hairline)' }}>
+            <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                padding: '12px 16px',
-                borderRadius: 16,
-                background: 'var(--pill-butter-bg)',
-                border: '1.5px solid var(--pill-butter-border)',
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '0.93rem',
-                color: 'var(--pill-butter-text)',
+                gap: 6,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9 }}>
-                <Clock size={17} />
-                Mostrar barra de tiempo sugerido del Excel
-              </span>
-              <input
-                type="checkbox"
-                checked={settings.showSuggestedTimer}
-                onChange={(e) =>
-                  onChangeSettings({ ...settings, showSuggestedTimer: e.target.checked })
-                }
-                style={{ width: 19, height: 19, accentColor: '#f59e0b', cursor: 'pointer' }}
-              />
-            </label>
+              <ListChecks size={14} color="var(--accent-lavender)" />
+              Preguntas
+            </div>
+            <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              {quiz.questions.length}
+            </div>
+          </div>
+
+          <div style={{ padding: '14px 16px', borderRight: '1px solid var(--border-hairline)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
+              }}
+            >
+              <Code2 size={14} color="var(--accent-sky)" />
+              Con código
+            </div>
+            <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              {quiz.codeQuestionsCount}
+            </div>
+          </div>
+
+          <div style={{ padding: '14px 16px', borderRight: '1px solid var(--border-hairline)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
+              }}
+            >
+              <Layers size={14} color="var(--accent-rose)" />
+              Múltiple opción
+            </div>
+            <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              {multiCount}
+            </div>
+          </div>
+
+          <div style={{ padding: '14px 16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
+              }}
+            >
+              <Timer size={14} color="var(--accent-mint)" />
+              Cronómetro
+            </div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--accent-mint)', marginTop: 4 }}>
+              Activo
+            </div>
+          </div>
+        </div>
+
+        {/* Settings List */}
+        <div
+          style={{
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 12,
+            background: 'var(--surface-1)',
+            marginBottom: 22,
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ borderBottom: '1px solid var(--border-hairline)' }}>
+            <SettingToggleRow
+              icon={Shuffle}
+              label="Mezclar orden de las preguntas"
+              description="Presenta las preguntas en orden aleatorio en cada intento."
+              checked={settings.shuffleQuestions}
+              onToggle={() =>
+                onChangeSettings({ ...settings, shuffleQuestions: !settings.shuffleQuestions })
+              }
+            />
+          </div>
+
+          <div
+            style={{
+              borderBottom: hasAnyTimeLimit ? '1px solid var(--border-hairline)' : 'none',
+            }}
+          >
+            <SettingToggleRow
+              icon={Clock}
+              label="Mostrar tiempo por pregunta"
+              description="Muestra el cronómetro individual de la pregunta actual y en la revisión."
+              checked={settings.showQuestionTimer}
+              onToggle={() =>
+                onChangeSettings({ ...settings, showQuestionTimer: !settings.showQuestionTimer })
+              }
+            />
+          </div>
+
+          {hasAnyTimeLimit && (
+            <SettingToggleRow
+              icon={Timer}
+              label="Mostrar barra de tiempo sugerido del Excel"
+              description="Usa la columna de tiempo límite del archivo como referencia visual."
+              checked={settings.showSuggestedTimer}
+              onToggle={() =>
+                onChangeSettings({
+                  ...settings,
+                  showSuggestedTimer: !settings.showSuggestedTimer,
+                })
+              }
+            />
           )}
         </div>
 
         {quiz.warnings?.length > 0 && (
           <div
             style={{
-              maxWidth: 560,
-              margin: '0 auto 22px',
-              padding: '12px 16px',
-              borderRadius: 16,
-              background: 'var(--pill-butter-bg)',
-              border: '1.5px solid var(--pill-butter-border)',
-              color: 'var(--pill-butter-text)',
-              textAlign: 'left',
-              fontSize: '0.86rem',
-              fontWeight: 700,
+              marginBottom: 20,
+              padding: '12px 15px',
+              borderRadius: 10,
+              background: 'var(--accent-amber-soft)',
+              border: '1px solid var(--accent-amber-border)',
+              color: 'var(--accent-amber)',
+              fontSize: '0.84rem',
+              fontWeight: 500,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <AlertTriangle size={16} />
-              Notas al importar:
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontWeight: 600, marginBottom: 4 }}>
+              <AlertTriangle size={15} />
+              Observaciones al importar
             </div>
-            <ul style={{ margin: 0, paddingLeft: 20 }}>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
               {quiz.warnings.map((w, i) => (
                 <li key={i}>{w}</li>
               ))}
@@ -280,70 +283,43 @@ export default function StartTab({
           </div>
         )}
 
-        {/* Primary CTA */}
+        {/* Footer Actions */}
         <div
           style={{
             display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: 12,
-            justifyContent: 'center',
-            alignItems: 'center',
           }}
         >
           <button
             type="button"
-            className="btn-pastel btn-primary"
-            style={{ padding: '16px 36px', fontSize: '1.15rem' }}
+            className="btn btn-ghost"
+            onClick={() => setShowPreview((p) => !p)}
+          >
+            {showPreview ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {showPreview
+              ? 'Ocultar vista previa'
+              : `Vista previa (${quiz.questions.length})`}
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
             onClick={onStartQuiz}
           >
-            <Play size={22} fill="currentColor" />
-            ¡Comenzar a responder!
-          </button>
-
-          <button
-            type="button"
-            className="btn-pastel btn-secondary"
-            onClick={onBackToUpload}
-          >
-            <Upload size={17} />
-            Cambiar archivo
-          </button>
-        </div>
-
-        {/* Toggle Preview */}
-        <div style={{ marginTop: 22 }}>
-          <button
-            type="button"
-            onClick={() => setShowPreview((p) => !p)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--pill-purple-text)',
-              fontWeight: 800,
-              fontSize: '0.92rem',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              fontFamily: 'inherit',
-            }}
-          >
-            {showPreview ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-            {showPreview
-              ? 'Ocultar vista previa de preguntas'
-              : `Ver vista previa (${quiz.questions.length} preguntas)`}
+            <Play size={16} fill="currentColor" />
+            Iniciar evaluación
           </button>
         </div>
       </div>
 
-      {/* Collapsible Preview List */}
+      {/* Preview List */}
       {showPreview && (
-        <div
-          className="animate-fade-up"
-          style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
-        >
+        <div className="animate-enter" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {quiz.questions.map((q, idx) => (
-            <div key={q.id} className="pastel-card" style={{ padding: '20px 22px' }}>
+            <div key={q.id} className="surface-card" style={{ padding: '18px 20px' }}>
               <div
                 style={{
                   display: 'flex',
@@ -354,58 +330,21 @@ export default function StartTab({
                   gap: 8,
                 }}
               >
-                <span
-                  style={{
-                    background: 'var(--pill-purple-bg)',
-                    color: 'var(--pill-purple-text)',
-                    fontWeight: 800,
-                    fontSize: '0.82rem',
-                    padding: '4px 12px',
-                    borderRadius: 999,
-                  }}
-                >
-                  Pregunta {idx + 1}
-                </span>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {q.hasCode && (
-                    <span
-                      style={{
-                        background: 'var(--pill-sky-bg)',
-                        color: 'var(--pill-sky-text)',
-                        fontWeight: 800,
-                        fontSize: '0.78rem',
-                        padding: '4px 10px',
-                        borderRadius: 999,
-                      }}
-                    >
-                      Código detectado
-                    </span>
-                  )}
-                  {q.isMultipleChoice && (
-                    <span
-                      style={{
-                        background: 'var(--pill-pink-bg)',
-                        color: 'var(--pill-pink-text)',
-                        fontWeight: 800,
-                        fontSize: '0.78rem',
-                        padding: '4px 10px',
-                        borderRadius: 999,
-                      }}
-                    >
-                      Múltiple respuesta
-                    </span>
-                  )}
+                <span className="badge badge-lavender">Pregunta {idx + 1}</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {q.hasCode && <span className="badge badge-sky">Código</span>}
+                  {q.isMultipleChoice && <span className="badge badge-rose">Múltiple</span>}
                 </div>
               </div>
 
               <RichContent
                 segments={q.questionSegments}
-                textStyle={{ fontWeight: 700, fontSize: '1rem' }}
+                textStyle={{ fontWeight: 600, fontSize: '0.96rem' }}
               />
 
               <div
                 style={{
-                  marginTop: 14,
+                  marginTop: 12,
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
                   gap: 8,
@@ -417,15 +356,15 @@ export default function StartTab({
                     <div
                       key={aIdx}
                       style={{
-                        padding: '10px 12px',
-                        borderRadius: 14,
-                        background: isCorrect ? 'var(--pill-mint-bg)' : 'var(--surface-neutral)',
-                        border: `1.5px solid ${
-                          isCorrect ? 'var(--pill-mint-border)' : 'var(--surface-neutral-border)'
+                        padding: '9px 12px',
+                        borderRadius: 9,
+                        background: isCorrect ? 'var(--accent-mint-soft)' : 'var(--surface-2)',
+                        border: `1px solid ${
+                          isCorrect ? 'var(--accent-mint-border)' : 'var(--border-hairline)'
                         }`,
-                        color: isCorrect ? 'var(--pill-mint-text)' : 'var(--text-main)',
-                        fontSize: '0.86rem',
-                        fontWeight: 700,
+                        color: isCorrect ? 'var(--accent-mint)' : 'var(--text-secondary)',
+                        fontSize: '0.84rem',
+                        fontWeight: 500,
                       }}
                     >
                       <RichContent segments={ans.segments} compact />
