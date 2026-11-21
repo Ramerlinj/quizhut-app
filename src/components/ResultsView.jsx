@@ -12,6 +12,8 @@ import {
   Clock,
   Sparkles,
   Download,
+  Check,
+  X,
 } from 'lucide-react';
 import RichContent from './RichContent';
 import { formatDurationMs, formatSecondsShort } from '../utils/timeFormat';
@@ -56,12 +58,12 @@ export default function ResultsView({
 
   const message =
     accuracy === 100
-      ? '¡Puntuación perfecta! 🌟'
+      ? '¡Puntuación perfecta!'
       : accuracy >= 75
-      ? '¡Muy buen trabajo! 🎉'
+      ? '¡Muy buen trabajo!'
       : accuracy >= 50
-      ? '¡Buen intento, sigue practicando! 💪'
-      : '¡Buena práctica! Inténtalo otra vez 🌸';
+      ? '¡Buen intento, sigue practicando!'
+      : '¡Buena práctica! Inténtalo otra vez';
 
   return (
     <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
@@ -395,17 +397,20 @@ export default function ResultsView({
                   let border = 'var(--surface-neutral-border)';
                   let color = 'var(--text-main)';
                   let tag = null;
+                  let tagIcon = null;
 
                   if (isRightAns) {
                     bg = 'var(--pill-mint-bg)';
                     border = 'var(--pill-mint-border)';
                     color = 'var(--pill-mint-text)';
-                    tag = wasPicked ? '✓ Tu respuesta correcta' : '✓ Respuesta correcta';
+                    tag = wasPicked ? 'Tu respuesta correcta' : 'Respuesta correcta';
+                    tagIcon = <Check size={13} strokeWidth={3} />;
                   } else if (wasPicked) {
                     bg = 'var(--pill-rose-bg)';
                     border = 'var(--pill-rose-border)';
                     color = 'var(--pill-rose-text)';
-                    tag = '✕ Tu elección';
+                    tag = 'Tu elección';
+                    tagIcon = <X size={13} strokeWidth={3} />;
                   }
 
                   return (
@@ -424,11 +429,15 @@ export default function ResultsView({
                       {tag && (
                         <div
                           style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
                             fontSize: '0.74rem',
                             fontWeight: 900,
                             marginBottom: 4,
                           }}
                         >
+                          {tagIcon}
                           {tag}
                         </div>
                       )}

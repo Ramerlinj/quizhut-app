@@ -633,4 +633,10 @@ export default function QuizPlayer({
             onClick={handleNext}
           >
             {isLastQuestion ? 'Ver resultados finales' : 'Siguiente pregunta'}
-            <Arr
+            <ArrowRight size={19} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
